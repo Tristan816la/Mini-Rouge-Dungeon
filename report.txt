@@ -1,0 +1,87 @@
+/*
+1. Goblin Algorithm
+DFS Algorithm File: Player.cpp
+Function Name:
+void Player::dfsGoblinLayout(int x, int y, int s);
+
+
+Other files that are useful: Goblin.cpp, Dungeon.cpp
+Other funtions that are useful:
+bool Goblin::move(); bool Monster::makeMove();
+
+// Read this if my algorithm causes any confusion
+Explanation:
+Instead of using a common practice to implement the DFS algorithm for each goblins, I found it a much better
+practice to have the player implmenting a 18 * 70 grid of integers to denote a grid's distance to the player, (I called goblin map).
+This grid stores a grid's distance to the position of the player.
+When the dungeon is constructed, they have default value 9999 (unvisited)
+
+This algorithm I implemented is Depth First Search(DFS). Even though a better practice could be BFS, it's not possible to
+implement BFS using recursion.
+
+When the player is placed or player make an action, dfsGoblinLayout(x,y,0) is called. It'll first mark the player's position
+in goblin map as 0, and then it'll check each possible direction and call,for instance, dfsGoblinLayout(x, y+1, 0+1) to the
+neighboring position, which would mark the southern neighboring grid as 1. This recursive algorithm only marks a new number
+when s is smaller than what is on goblinmap[y][x] and ends when s = smellDistance
+
+For each goblin, what they need to do is to check whether they are stepping on a node with value in goblin map less than 15.
+If so, they will attemp to move by calling makeMove() function. makeMove() is a function defined for all monsters,
+it'll check the optimal route for a monster to move.
+
+2.
+//(The following are the designs that I didn't notice at first but hard to change later)
+//*P.S.1. Instead of calling inventory, I made it called Menu.
+//**P.S.2 Using 18 * 70 2D arrays as grids, my x, y are used inversely. e.g. to denote a point (x,y) on grid,
+//I have to use, nodes[y][x] instead of nodes[x][y]
+//***P.S.3 I called grid node in my implementation, so in Dungeon I have nodes[18][70] instead of grid[18][70]
+//****P.S.4 I called GameObjects "items".
+
+Design of My Program
+List of Contents:
+  2.1 Dungeon
+  2.2 Actor
+    2.2.1 Monsters
+    2.2.2.n Each Monster (int n; n <= 4 && n>=1)
+  2.2.2 Player
+  2.3 Items
+    2.3.1 Weapons
+    2.3.2 Scrolls
+  2.4 Menu
+  2.5 Others
+
+2.1 Dungeon
+  Dungeon is the class of the gaming interface and a class integrated features among different class.
+
+  1) Two-layer Design
+  The dungeon has two layers.
+  The first layer on the top is called nodes. It only fills with ' ' or '#', denoting whether or not a monster or player could
+  move to this node.
+  The second layer is called "itemLayer", which stores all the items in Dungeon.
+
+  During the rendering stage, the first layer's content is displayed first, and only when the node on first layer is ' ',
+  the content at the corresponding position in itemLayer would be displayed.
+
+  2) Structs: Room & Coord
+  There are two structs used in dungeon.
+  Coord, denoted as (x,y) mathematically, are used for storing empty nodes and room generation.
+  Room, storing the upper-left and lower-right Coord of a rectangle, is used for room generation.
+
+  3) Empty Nodes
+  I used a vector to store nodes with ' ' as their values. This vector is helpful for teleportation and placement of player,
+  placement of items and monsters, and corridor generation.
+
+2.2 Actor
+  2.2.1 Monster
+    The following is some general features all monsters have
+    1) Distance
+      return the absolute distance the monster is to the player (Taking walls into account)
+    2)
+
+  2.2.2 Different Monsters
+
+*/
+
+3. Non-trivial Algorithm
+3.1 Room and Corridor Generators
+3.2 Teleportation of the player
+3.3 Attack
