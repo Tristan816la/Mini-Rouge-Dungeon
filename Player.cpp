@@ -82,6 +82,7 @@ bool Player::move(char act, string& msg) {
 void Player::fightP(string& msg, Monster* m){
     msg = "Player " + get_weapon()->getActionName() + " at the " + m->getName(); 
     fight(msg,m);
+    // When the player is wielding a magic fang
     if(m->get_hp() > 0 && get_weapon()->get_name() == "magic fangs of sleep" && trueWithProbability(0.2)){
         msg = msg.substr(0,msg.size()-1);
         m->set_sleep(max(m->get_sleep(),randInt(2,6)));
@@ -95,7 +96,7 @@ void Player::cheat(){
 }
 bool Player::win() const {return success;}
 bool Player::grab(string& msg){
-    if(menu->size() > 26){msg = "Your knapsack is full; you can't pick that up."; return false;}
+    if(menu->size() > 25){msg = "Your knapsack is full; you can't pick that up."; return false;}
     if(get_dungeon()->getItem(get_x(),get_y()) != ' ' && get_dungeon()->getItem(get_x(),get_y()) != '>' ){
         if(get_dungeon()->getItem(get_x(),get_y()) == '&'){
             msg = "You pick up the golden idol\nCongratulations, you won!";

@@ -12,7 +12,7 @@ bool Goblin::move(); bool Monster::makeMove();
 // Read this if my algorithm causes any confusion
 Explanation:
 Instead of using a common practice to implement the DFS algorithm for each goblins, I found it a much better
-practice to have the player implmenting a 18 * 70 grid of integers to denote a grid's distance to the player, (I called goblin map).
+practice to have the player implmenting a 18 * 70 grid of integers to denote a grid's distance to the player, (I called it goblin map).
 This grid stores a grid's distance to the position of the player.
 When the dungeon is constructed, they have default value 9999 (unvisited)
 
@@ -41,7 +41,7 @@ List of Contents:
   2.1 Dungeon
   2.2 Actor
     2.2.1 Monsters
-    2.2.2.n Each Monster (int n; n <= 4 && n>=1)
+    2.2.1.n Each Monster (int n; n <= 4 && n>=1)
   2.2.2 Player
   2.3 Items
     2.3.1 Weapons
@@ -51,6 +51,9 @@ List of Contents:
 
 2.1 Dungeon
   Dungeon is the class of the gaming interface and a class integrated features among different class.
+  Important Data member: (By saying the important data member, I'm referring to the object that would be deleted when calling
+  the destructor):
+  vector<Monster*> monsters, Player* p, vector<Item*> items
 
   1) Two-layer Design
   The dungeon has two layers.
@@ -70,18 +73,85 @@ List of Contents:
   I used a vector to store nodes with ' ' as their values. This vector is helpful for teleportation and placement of player,
   placement of items and monsters, and corridor generation.
 
+  4) teleportPlayer
+  5)
+
 2.2 Actor
+  Actor refers to the monsters and the player in this game.
+  Important data member: Weapon* wp
+
+  The following is a general feature all actors have
+    1) ableMove
+      return whether a certain move is hitting the wall or going out of the border. If not, return true
+    2) fight
+      This function allows an actor to hit another actor. It uses the formula:
+      (attacker refers to "this")
+      attackerPoints = attackerDexterity + weaponDexterityBonus;
+      defenderPoints = defenderDexterity + defenderArmorPoints;
+      if (randInt(1, attackerPoints) >= randInt(1, defenderPoints))
+        attacker has hit defender
+
+
   2.2.1 Monster
     The following is some general features all monsters have
-    1) Distance
+    1) distance
       return the absolute distance the monster is to the player (Taking walls into account)
-    2)
+    2) checkMove
+      first check ableMove(), then return true if a certain move could shorten the absolute distance between the player and
+      the monster
+    3) makeMove
+      call checkMove to each four directions, swap the node content(' ' and 'S', for example), to make it look like the monster
+      is moving. Also, update the monster position so that the monster's position is actually moved
+      (P.s. this function is not the best practice, since I didn't come up with a better idea at first)
+    4) fightM
+      check if the player has an hp> 0. If so, attack the player. Notice that this function is a virtual function and may be
+      override by different kinds of monsters to render different message.
 
-  2.2.2 Different Monsters
 
+  2.2.1 Different Monsters
+  2.2.1.1 Snakewoman
+    Snakewoman makeMove() only the distance() <= 5. When it fights with the player, it has a 20% chance to put the player
+    into sleep, which is acheived by overriding fightM().
+
+  2.2.1.2 Goblin
+    Goblin first checks its position on Goblin map. If at its position the goblin map is having a value less than the smell distance,
+    the goblin will makeMove()
+
+    (p.s. A potential bug could happen if we tune the smellDistance less than 6 and the player uses the magic fangs to put the goblin
+    into sleep and runs 6 grids away. When the Goblin is awake, it might still chase the player. However, since the goblin should have
+    15 for smell distance by default, there is no need to worry about this issue)
+
+  2.2.1.3 Dragon
+    Dragon doesn't move, so in its move() function, it has 10% chance to regenerate one hp.
+
+  2.2.1.4 Bogeyman
+    Snakewoman makeMove() only the distance() <= 3.
+
+  2.2.2 Player
+    The Player is the actor that the users can manipulate. It will win only if it gets the golden idol. When the player
+    has hp < 0, the game is over and the player dies.
+
+    It has several functions that worth discussing here.
+    1) Action
+    This function is called in each round of the game. It will get a character from the user, analyze the character, and
+    call different functions for subsequent movements. For instance, if a user presses 'i', action would call the inspect()
+    function
+    2) Inspect
+    This function is called when the user presses 'i'. It will get another character by calling getCharacter() and do
+    nothing
+    3) Grab
+    This function is called when the user presses 'g'. It will check if users' menu is full first, then check if there is any
+    item at the player's current location. If so, it will
+    A special case of golden idol is also written in this function.
+    4) Cheat
+    Set hp to 50, set strength to 50
+    5) Utilize
+    When the player calls 'r' or 'w', this function is called. It will check if the player could use the object, let player wield
+    a new weapon or read a scroll, and update the messages.
 */
 
 3. Non-trivial Algorithm
 3.1 Room and Corridor Generators
 3.2 Teleportation of the player
-3.3 Attack
+3.3 fight
+3.4 Messages on the screen

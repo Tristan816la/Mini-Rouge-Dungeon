@@ -10,7 +10,7 @@ class Menu{
         Item* getItem(int i) const;
         int size() const;
 
-        bool addItem(Item* i);
+        void addItem(Item* i);
         void removeItem(int j);
         void displayMenu() const;
 
@@ -18,8 +18,6 @@ class Menu{
         std::vector<Item*> items;
         Player* pl;
 };
-
-
 
 
 #endif // MENU_H

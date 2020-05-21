@@ -98,6 +98,11 @@ void Dungeon::setNode(int x, int y, char c){nodes[y][x] = c;}
 void Dungeon::setItem(int x, int y, char c){itemLayer[y][x] = c;}
 void Dungeon::addItem(Item* i){items.push_back(i);}
 void Dungeon::realGenerate(){
+    emptyNodes.clear();
+
+     // Delete every items in the previous floor
+    if(level != 0) deleteGround();
+
     // Put every node the wall and make every node in the itemLayer blank 
     for (int i = 0; i < MAX_ROW; i++){
         for (int j = 0; j < MAX_COL; j++){
@@ -105,8 +110,7 @@ void Dungeon::realGenerate(){
             itemLayer[i][j] = ' ';
         }
     }
-    // Delete every items in the previous floor
-    if(level != 0) deleteGround();
+
 
     monsters.resize(randInt(2, 5*(level+1)+1));
     vector<Room> tempRooms = roomGenerator();
@@ -115,9 +119,8 @@ void Dungeon::realGenerate(){
 
     //Shuffle 1-6 and select 4-6 rooms with these random indices
     int rands[6] = {0,1,2,3,4,5}; shuffle(rands);
-    for (int i = 0; i < rooms.size(); i++){
+    for (int i = 0; i < rooms.size(); i++)
         rooms[i] = tempRooms[rands[i]];
-    }
 
     // Check each room, make nodes " "
     for (vector<Room> :: iterator i = rooms.begin(); i != rooms.end(); i++){
@@ -164,9 +167,9 @@ void Dungeon::deleteGround(){
         i->deleteMonsterDrop();
         delete i;
     }
-    for(auto i : items){
+    for(auto i : items)
         delete i;
-    } // Clear vectors so size is 0 and no content in them
+    // Clear vectors so size is 0 and no content in them
     monsters.clear();
     items.clear();
 }
@@ -186,6 +189,7 @@ void Dungeon::updateMonster(){
     for(int i= 0; i < monsters.size();i++){
         if(monsters[i]->diedandDrop()){
             delete monsters[i];
+            cout << "Monster died " << i << endl;
             monsters.erase(monsters.begin()+i);
             i--;
         }
@@ -209,62 +213,48 @@ void Dungeon::display() {
     p->get_dexterity() << endl << endl;
 }
 void Dungeon::monsterGenerator(){
-    int* monsterChoices = new int[monsters.size()];
-    // Generate monsters' number of choices
-    for (int i = 0; i < monsters.size(); i++){
-        int monsterChoice = randInt(0, emptyNodes.size()-1);
-        monsterChoices[i] = monsterChoice;
-        emptyNodes.erase(emptyNodes.begin()+ monsterChoices[i]);
-    }
+    updateEmptyNodes();
+    vector<Coord> monsterChoices = generateChoices(monsters.size());
     for (int i = 0; i < monsters.size(); i++){
         int rand; Monster* temp; 
         if(level <= 1) rand = randInt(0,1);
         if(level == 2) rand = randInt(0,2);
         if(level >= 3) rand = randInt(0,3);
         if (rand==0)
-            temp = new SnakeWoman(p,this,emptyNodes[monsterChoices[i]].x,emptyNodes[monsterChoices[i]].y);
+            temp = new SnakeWoman(p,this,monsterChoices[i].x,monsterChoices[i].y);
         if (rand==1)
-            temp = new Goblin(p,this,emptyNodes[monsterChoices[i]].x,emptyNodes[monsterChoices[i]].y);
+            temp = new Goblin(p,this,monsterChoices[i].x,monsterChoices[i].y);
         if (rand==2)
-            temp = new Bogeyman(p,this,emptyNodes[monsterChoices[i]].x,emptyNodes[monsterChoices[i]].y);
+            temp = new Bogeyman(p,this,monsterChoices[i].x,monsterChoices[i].y);
         if (rand==3)
-            temp = new Dragon(p,this,emptyNodes[monsterChoices[i]].x,emptyNodes[monsterChoices[i]].y);
+            temp = new Dragon(p,this,monsterChoices[i].x,monsterChoices[i].y);
         monsters[i] = temp;
+        
     }
-    delete[] monsterChoices;
 }
+
 void Dungeon::nextGenerator(){
-    if(level <= 3){
-    int stepChoice = randInt(0,emptyNodes.size()-1);
-    setItem(emptyNodes[stepChoice].x,emptyNodes[stepChoice].y,'>');
-    emptyNodes.erase(emptyNodes.begin() + stepChoice);
-    }else{
-        int trophyChoice = randInt(0,emptyNodes.size()-1);
-        setItem(emptyNodes[trophyChoice].x,emptyNodes[trophyChoice].y,'&');
-        emptyNodes.erase(emptyNodes.begin()+trophyChoice);
-    }
+    vector<Coord> nextChoice = generateChoices(1);
+    if(level <= 3)
+        setItem(nextChoice[0].x,nextChoice[0].y,'>');
+    else
+        setItem(nextChoice[0].x,nextChoice[0].y,'&');
 }
 void Dungeon::itemGenerator(){
     items.resize(randInt(2,3));
-    int* itemChoices = new int[items.size()];
-    for (int i = 0; i < items.size(); i++){
-        int itemChoice = randInt(0, emptyNodes.size()-1);
-        itemChoices[i] = itemChoice;
-        emptyNodes.erase(emptyNodes.begin() + itemChoice);
-    }
+    vector<Coord> itemChoices = generateChoices(items.size());
     for (int i = 0; i < items.size(); i++){
         int option = randInt(0,1);
         Item* temp;
         if (option == 0)
-            temp = new Weapon(this,emptyNodes[itemChoices[i]].x,emptyNodes[itemChoices[i]].y,randInt(0,2));    
+            temp = new Weapon(this,itemChoices[i].x,itemChoices[i].y,randInt(0,2));    
         else
-            temp = new Scroll(this,emptyNodes[itemChoices[i]].x,emptyNodes[itemChoices[i]].y,randInt(1,4));
+            temp = new Scroll(this,itemChoices[i].x,itemChoices[i].y,randInt(1,4));
         items[i] = temp;
     }
     for (Item* i : items){
         i->placeItem(i->get_x(),i->get_y());
     }
-    delete[] itemChoices;
 }
 void Dungeon::reSetGoblinTable(){
     for(int i = 0; i < MAX_COL; i++){
@@ -306,4 +296,15 @@ void Dungeon::updateEmptyNodes(){
        }
     }
     emptyNodes = temp;
+}
+
+vector<Dungeon::Coord> Dungeon::generateChoices(int num){
+    vector<Coord> temp;
+    // Generate num choices
+    for(int i = 0; i < num; i++){
+        int rand = randInt(0, emptyNodes.size()-1);
+        temp.push_back(emptyNodes[rand]);
+        emptyNodes.erase(emptyNodes.begin() + rand);
+    }
+    return temp;
 }

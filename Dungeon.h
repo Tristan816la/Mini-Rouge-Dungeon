@@ -64,6 +64,7 @@ class Dungeon{
         void shuffle(int arr[]);
         
         //Update Nodes status
+        std::vector<Coord> generateChoices(int num);
         void updateEmptyNodes();
         void nextGenerator(); 
         void monsterGenerator();

@@ -19,7 +19,7 @@ void Menu::displayMenu() const{
     clearScreen();
     cout << "Inventory: " << endl;
     for(int i = 0; i < items.size();i++){
-        cout << char('a' + i) << ". ";
+        cout << " " << char('a' + i) << ". ";
         string temp = items[i]->get_name();
         if (temp[0] == 'a') // Scroll's first letter in menu needed to be capitalized
             cout << "A" << temp.substr(1) << endl;
@@ -27,12 +27,9 @@ void Menu::displayMenu() const{
             cout << temp << endl;
     }
 }
-bool Menu::addItem(Item* i){
-    if(items.size() < 27){
+void Menu::addItem(Item* i){
+    if(items.size() < 27)
         items.push_back(i);
-        return true;
-    }
-    return false;
 }
 void Menu::removeItem(int j) {
     delete items[j];
