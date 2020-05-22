@@ -51,7 +51,7 @@ class Dungeon{
             int y;
         };
 
-        struct Room {
+        struct Room { // storing two points for the rectangles
             Room(){}
             Room(Coord uL, Coord lR) : upperLeft(uL), lowerRight(lR){}
             Coord upperLeft;
@@ -80,8 +80,6 @@ class Dungeon{
         int level;
         Player* p;
 };
-
-
 
 
 #endif // DUNGEON_H

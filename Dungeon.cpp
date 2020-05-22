@@ -58,7 +58,10 @@ char Dungeon::getNode(int x, int y) const{
     return nodes[y][x];
 }
 void Dungeon::teleportPlayer(){
-    Coord a = emptyNodes[randInt(emptyNodes.size())];
+    updateEmptyNodes();
+    int rand = randInt(emptyNodes.size());
+    Coord a = emptyNodes[rand];
+    emptyNodes.erase(emptyNodes.begin() + rand);
     int x = a.x; int y = a.y;
     setNode(x,y,'@');
     p->set_x(x); p->set_y(y);
@@ -73,9 +76,9 @@ Item* Dungeon::get_item(int x, int y) const{
 char Dungeon::getItem(int x, int y) const{
     return itemLayer[y][x];
 }
-bool Dungeon::swapNode(int x1, int y1, int x2, int y2){
+bool Dungeon::swapNode(int x1, int y1, int x2, int y2){ // swap node used for moving and teleporting
     std::swap(nodes[y1][x1],nodes[y2][x2]);
-    return true; // for now
+    return true;
 }
 bool Dungeon::hasMonster(int x, int y) const{
     return (nodes[y][x] == 'B' || nodes[y][x] == 'S' || nodes[y][x] == 'D' || nodes[y][x] == 'G');
@@ -120,7 +123,7 @@ void Dungeon::realGenerate(){
     //Shuffle 1-6 and select 4-6 rooms with these random indices
     int rands[6] = {0,1,2,3,4,5}; shuffle(rands);
     for (int i = 0; i < rooms.size(); i++)
-        rooms[i] = tempRooms[rands[i]];
+        rooms[i] = tempRooms[rands[i]]; // Assign 4-6 rooms
 
     // Check each room, make nodes " "
     for (vector<Room> :: iterator i = rooms.begin(); i != rooms.end(); i++){
@@ -139,17 +142,16 @@ void Dungeon::realGenerate(){
         p = new Player(emptyNodes[playerChoice].x,emptyNodes[playerChoice].y, this);
         emptyNodes.erase(emptyNodes.begin()+playerChoice);
     }else{
-        updateEmptyNodes();
         teleportPlayer();
         updateEmptyNodes(); // since we reset player's position, emptyNodes got changed
     }
 }
 void Dungeon::corridorGenerator(vector<Dungeon::Room>& a){
     for(int j = 1; j < a.size(); j++){
-        int startX = a[j].upperLeft.x + randInt(1,2); 
-        int startY = a[j].upperLeft.y + randInt(1,2);
-        int endX = a[j-1].lowerRight.x- randInt(2,3);
-        int endY= a[j-1].lowerRight.y- randInt(2,3);
+        int startX = (a[j].upperLeft.x + a[j].lowerRight.x)/2; 
+        int startY = (a[j].upperLeft.y + a[j].upperLeft.y)/2;
+        int endX = (a[j-1].upperLeft.x + a[j-1].lowerRight.x)/2;
+        int endY= (a[j-1].upperLeft.y + a[j-1].lowerRight.y)/2;
         while (startX != endX){
             (startX > endX) ? startX-- : startX++;        
             nodes[startY][startX] = ' ';
@@ -189,7 +191,6 @@ void Dungeon::updateMonster(){
     for(int i= 0; i < monsters.size();i++){
         if(monsters[i]->diedandDrop()){
             delete monsters[i];
-            cout << "Monster died " << i << endl;
             monsters.erase(monsters.begin()+i);
             i--;
         }
@@ -282,7 +283,8 @@ void Dungeon::MonstersAttack(std::vector<string>& msgs){
         if(monsters[i]->distance() == 1){
             string temp;
             monsters[i]->fightM(temp);
-            msgs.push_back(temp);
+            if(!temp.empty())
+                msgs.push_back(temp);
         }
     }
 }
@@ -298,9 +300,8 @@ void Dungeon::updateEmptyNodes(){
     emptyNodes = temp;
 }
 
-vector<Dungeon::Coord> Dungeon::generateChoices(int num){
+vector<Dungeon::Coord> Dungeon::generateChoices(int num){ // Generate num choices
     vector<Coord> temp;
-    // Generate num choices
     for(int i = 0; i < num; i++){
         int rand = randInt(0, emptyNodes.size()-1);
         temp.push_back(emptyNodes[rand]);

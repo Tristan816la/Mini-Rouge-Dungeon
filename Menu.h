@@ -3,7 +3,7 @@
 #include<vector>
 class Player;
 class Item;
-class Menu{
+class Menu{ // Inventory in Spec
     public:
         Menu(Player* p);
         ~Menu();

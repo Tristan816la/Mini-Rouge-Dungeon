@@ -8,7 +8,7 @@ class Bogeyman : public Monster{
 public: 
     Bogeyman(Player* p,  Dungeon* dg, int x, int y);
     virtual bool move();
-    virtual void fightM(std::string& msg);
+    virtual bool fightM(std::string& msg);
 private:
 };
 #endif // BOGEYMAN_H

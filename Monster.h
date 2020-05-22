@@ -14,11 +14,11 @@ class Monster : public Actor{
         virtual ~Monster();
         virtual bool move();
         void deleteMonsterDrop();// delete drop
-        virtual void fightM(std::string& msg);
+        virtual bool fightM(std::string& msg);
         void dropUpdate(); 
         bool checkMove(int x, int y) const; // check if it is able and optimal for a monster to move
         int distance() const; // distance between monster and player
-        bool makeMove(); // make move when in certain distance
+        bool makeMove(); // make move when in certain distance, called by snakewoman and Bogeyman
         bool diedandDrop();
 
         Item* getDrop() const;

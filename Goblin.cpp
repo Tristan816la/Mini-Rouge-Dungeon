@@ -14,12 +14,34 @@ randInt(15,20),1,3,1,x,y){
 
 bool Goblin::move(){
     if(getPlayer()->getDistance(get_x(),get_y()) <= getPlayer()->getGoblinSmellDistance())
-        return makeMove();
+        return goblinMove();
     return false;
 }
 
-void Goblin::fightM(string& msg){
+bool Goblin::fightM(string& msg){
+    if(get_sleep() > 0){set_sleep(get_sleep()-1); return false;}
     msg += "the Goblin " + get_weapon()->getActionName() + " at the Player";
-    Monster::fightM(msg);
+    return Monster::fightM(msg);
+}
+
+bool Goblin::goblinMove(){
+    //Move only when the num on goblin map on a specific direction
+    // is smaller than the distance of goblin's current distance
+    int distance = getPlayer()->getDistance(get_x(),get_y());
+    if(get_sleep() > 0) {set_sleep(get_sleep()-1); return false;} 
+    if(ableMove(get_x()+1,get_y()) && getPlayer()->getDistance(get_x()+1,get_y()) < distance){
+        get_dungeon()-> swapNode(get_x()+1,get_y(),get_x(),get_y());
+        set_x(get_x()+1); return true;
+    }else if(ableMove(get_x()-1,get_y()) && getPlayer()->getDistance(get_x()-1,get_y()) < distance){
+        get_dungeon()-> swapNode(get_x()-1,get_y(),get_x(),get_y());
+        set_x(get_x()-1); return true;
+    }else if(ableMove(get_x(),get_y()+1) && getPlayer()->getDistance(get_x(),get_y()+1) < distance){
+        get_dungeon()-> swapNode(get_x(),get_y()+1,get_x(),get_y());
+        set_y(get_y()+1); return true;
+    }else if(ableMove(get_x(),get_y()-1) && getPlayer()->getDistance(get_x(),get_y()-1) < distance){
+        get_dungeon()-> swapNode(get_x(),get_y()-1,get_x(),get_y());
+        set_y(get_y()-1); return true;
+    }
+    return false;
 }
 

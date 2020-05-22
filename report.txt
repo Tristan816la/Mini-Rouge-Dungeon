@@ -4,29 +4,36 @@ DFS Algorithm File: Player.cpp
 Function Name:
 void Player::dfsGoblinLayout(int x, int y, int s);
 
-
 Other files that are useful: Goblin.cpp, Dungeon.cpp
 Other funtions that are useful:
-bool Goblin::move(); bool Monster::makeMove();
+bool Goblin::move(); bool Goblin::goblinMove();
 
 // Read this if my algorithm causes any confusion
 Explanation:
 Instead of using a common practice to implement the DFS algorithm for each goblins, I found it a much better
-practice to have the player implmenting a 18 * 70 grid of integers to denote a grid's distance to the player, (I called it goblin map).
+practice to have the player implementing a 18 * 70 grid of integers to denote a grid's distance to the player, (I called it goblin map).
 This grid stores a grid's distance to the position of the player.
-When the dungeon is constructed, they have default value 9999 (unvisited)
+Every time the player makes an action(), all grids will firstly set to default value 9999 (unvisited)
 
 This algorithm I implemented is Depth First Search(DFS). Even though a better practice could be BFS, it's not possible to
 implement BFS using recursion.
 
-When the player is placed or player make an action, dfsGoblinLayout(x,y,0) is called. It'll first mark the player's position
-in goblin map as 0, and then it'll check each possible direction and call,for instance, dfsGoblinLayout(x, y+1, 0+1) to the
-neighboring position, which would mark the southern neighboring grid as 1. This recursive algorithm only marks a new number
-when s is smaller than what is on goblinmap[y][x] and ends when s = smellDistance
+When the player is placed or player makes an action, it'll reset the goblin map, then dfsGoblinLayout(x,y,0) is called.
+It'll first mark the player's position in goblin map as 0, and then it'll check each possible direction and call,for instance,
+dfsGoblinLayout(x, y+1, 0+1) to the neighboring position, which would mark the southern neighboring grid as 1. This recursive algorithm
+only marks a new number when s is smaller than what is on goblinmap[y][x] and ends when s = smellDistance or found a goblin(Base cases).
 
 For each goblin, what they need to do is to check whether they are stepping on a node with value in goblin map less than 15.
-If so, they will attemp to move by calling makeMove() function. makeMove() is a function defined for all monsters,
-it'll check the optimal route for a monster to move.
+If so, they will attempt to move by calling goblinMove() function. goblinMove() will check grids in goblin map
+with less value, and make the goblin move to that grid.
+
+Advantage: the good thing about marking number instead of marking visited is this algorithm is really efficient. It saves time
+if going to the same spot from different direction (There is no need to traverse if two route overlap but one takes more steps).
+Comparing to the traditional algorithm which needs to check each direction and pick the minimal one (4^15, theoretical maximum),
+this algorithm at most will only check (15+15) * 15 = 450 nodes which is way more efficient.
+(Time complexity: O(n^2) vs O(4^n))
+
+As a result, the performance of the game is basically not affected even not using g32 fast mode.
 
 2.
 //(The following are the designs that I didn't notice at first but hard to change later)
@@ -37,7 +44,7 @@ it'll check the optimal route for a monster to move.
 //****P.S.4 I called GameObjects "items".
 
 Design of My Program
-List of Contents:
+Contents:
   2.1 Dungeon
   2.2 Actor
     2.2.1 Monsters
@@ -47,7 +54,13 @@ List of Contents:
     2.3.1 Weapons
     2.3.2 Scrolls
   2.4 Menu
-  2.5 Others
+  2.5 Game
+
+3.Non-trivial algorithms
+  3.1 Room and Corridor Generation
+  3.2 Teleportation of the player
+  3.3 fightM
+  3.4 Messages on the screen
 
 2.1 Dungeon
   Dungeon is the class of the gaming interface and a class integrated features among different class.
@@ -64,26 +77,40 @@ List of Contents:
   During the rendering stage, the first layer's content is displayed first, and only when the node on first layer is ' ',
   the content at the corresponding position in itemLayer would be displayed.
 
-  2) Structs: Room & Coord
+  2) Struct Room & Struct Coord
   There are two structs used in dungeon.
   Coord, denoted as (x,y) mathematically, are used for storing empty nodes and room generation.
   Room, storing the upper-left and lower-right Coord of a rectangle, is used for room generation.
 
-  3) Empty Nodes
+  3) vector<Coord> emptyNodes
   I used a vector to store nodes with ' ' as their values. This vector is helpful for teleportation and placement of player,
   placement of items and monsters, and corridor generation.
 
-  4) teleportPlayer
-  5)
+  4) void teleportPlayer(int x, int y)
+  teleportPlayer(x, y) is the function I used for the scroll of teleportation and placing the player when it reaches a new floor.
+  It gets an a coord from emptyNodes, swap the node's content(' ') with the player('@') to achieve the teleportation effect.
+  It also sets player to the new position.
+
+  5) vector<Coord>generateChoices(int num)
+  generateChoices(int num) is the function I used for generating items, monsters, stairs, and golden idol. It'll randomly choose
+  num choices in emptyNodes, and return a vector of empty Coords.
+
+  6) void start()
+  start() is called everytime before the player makes an action(). It has several self-explanatory functions in it:
+    a. realGenerate(): generate rooms and corridors
+    b. resetGoblinTable(): every nodes need to be set to 9999 by default at start
+    c. nextGenerator(): generate ">" or "&" for the game to go next
+    d. monsterGenerator():
+    e. itemGenerator(): generate 2-3 GameObjects.
 
 2.2 Actor
   Actor refers to the monsters and the player in this game.
   Important data member: Weapon* wp
 
   The following is a general feature all actors have
-    1) ableMove
+    1) bool ableMove(int x, int y)
       return whether a certain move is hitting the wall or going out of the border. If not, return true
-    2) fight
+    2) bool fight(string msg, Actor* defender)
       This function allows an actor to hit another actor. It uses the formula:
       (attacker refers to "this")
       attackerPoints = attackerDexterity + weaponDexterityBonus;
@@ -91,21 +118,20 @@ List of Contents:
       if (randInt(1, attackerPoints) >= randInt(1, defenderPoints))
         attacker has hit defender
 
-
   2.2.1 Monster
     The following is some general features all monsters have
-    1) distance
+    1) int distance()
       return the absolute distance the monster is to the player (Taking walls into account)
-    2) checkMove
+    2) bool checkMove()
       first check ableMove(), then return true if a certain move could shorten the absolute distance between the player and
-      the monster
-    3) makeMove
+      the monster. This function is used by trivial monsters.
+    3) bool makeMove()
       call checkMove to each four directions, swap the node content(' ' and 'S', for example), to make it look like the monster
       is moving. Also, update the monster position so that the monster's position is actually moved
       (P.s. this function is not the best practice, since I didn't come up with a better idea at first)
-    4) fightM
+    4) bool fightM(string& msg)
       check if the player has an hp> 0. If so, attack the player. Notice that this function is a virtual function and may be
-      override by different kinds of monsters to render different message.
+      override by different kinds of monsters to render different messages.
 
 
   2.2.1 Different Monsters
@@ -129,29 +155,126 @@ List of Contents:
 
   2.2.2 Player
     The Player is the actor that the users can manipulate. It will win only if it gets the golden idol. When the player
-    has hp < 0, the game is over and the player dies.
+    has hp < 0, the player dies and the game is over.
 
     It has several functions that worth discussing here.
-    1) Action
+    1) bool Action(vector<string>& msg)
     This function is called in each round of the game. It will get a character from the user, analyze the character, and
     call different functions for subsequent movements. For instance, if a user presses 'i', action would call the inspect()
-    function
+    function. It also update the messages by calling other functions.
+    Also, at the end of Action(), dfsGoblinLayout(x,y,0) is called to update the distance to the player.
+
     2) Inspect
     This function is called when the user presses 'i'. It will get another character by calling getCharacter() and do
     nothing
+
     3) Grab
     This function is called when the user presses 'g'. It will check if users' menu is full first, then check if there is any
     item at the player's current location. If so, it will
     A special case of golden idol is also written in this function.
+
     4) Cheat
     Set hp to 50, set strength to 50
+
     5) Utilize
     When the player calls 'r' or 'w', this function is called. It will check if the player could use the object, let player wield
     a new weapon or read a scroll, and update the messages.
+
+  2.3 Items
+      Items refer to the GameObjects in spec, and the items in the game includes weapons and scrolls. It is a Abstract Base Class
+      Items can check if it is ablePlace(x, y) in itemLayer. It cannot call placeItem(x,y) as a pure virtual function.
+
+  2.3.1 Weapons
+      There are five weapons in this game. In the .h files, I made five const ints to denote these five weapons.
+      Using const ints are beneficial when we would like to generate weapons by randInt().
+
+      Each weapon has its damage, dexterity bonus(d_b), and actionName.
+                              Damage     D_b       ActionName
+      0: SHORT_SWORD:           2          0       slashes short sword
+      1: LONG_SWORD:            4          2       swings long sword
+      2: MACE:                  2          0       swings mace
+      3: MAGIC_FANG_OF_SLEEP:   2          3       strikes magic fangs
+      4: MAGIC_AXE              5          5       chops magic axes
+      I implement the feature of magic fang of sleeps in Player.cpp. If the player is wielding magic fangs, it has a 20% chance
+      to put the defending monster into sleep.
+
+  2.3.2 Scrolls
+      There are five scrolls in this game. I used string name to denote different scrolls.
+      Using a string name is more convenient to display items in the menu.
+
+      void effect(string& msg)
+      This function is called when the user uses a scroll in the menu. It will give different bonus to the player.
+      It's worth noticing the scroll of teleportation uses the teleportPlayer(x,y) in Dungeon
+
+  2.4 Menu
+      Menu, known as Inventory in spec, is the stuff that the player has.
+      It has functions like adding items, removing items, and displaying. Notice that I didn't let the golden idol be treated
+      as a possible item in menu because whenever the player picks up the item, the game is over.
+
+  2.5 Game
+      Game is given by the skeleton folder. In its different functions and its constructor, I did these.
+      1) Game(int goblinSmellDistance)
+        Create a dungeon, -1 because dungeon->start() will let level++
+        start the game
+        Set the goblinSmellDistance data member in player to be 15(by default)
+      2) void play()
+        display dungeon
+        if the game not ends,
+          initialize an vector of strings for the player and the monsters to update
+          take player's action, store a boolean to see whether the player hits 'q'
+          let all monsters attack, then move. All monsters should attack first then
+          go to the optimal location
+          clear and display the screen again since above we did all updates
+          display the messages at the bottom
+        handleEnd()
+      3) handleEnd()
+        Unless user presses 'q', it'll keep prompting user to "press q to quit the game"
 */
 
 3. Non-trivial Algorithm
 3.1 Room and Corridor Generators
+  3.1.1 vector<Room> roomGenerator()
+    roomGenerator() generates six rooms.
+    Instead of implementing the classic leetcode doOverlap() function, I found it easy to manually choose six non-overlapping regions
+    to generate random size rectangles.
+    I manually picked 12 Coords, 6 pairs of upperLeft and lowerRight Coords, to form six rooms. These Coords are picked randomly, but I specified
+    the region for picking these rooms. For instance, the leftmost Coord for the first room is 2, rightmost is 13. By specifying the regions of
+    generation for different rooms, I guaranteed that these rooms are not going out of boundary and do not overlap with each other.
+
+    In start(), I called tempRooms = roomGenerator(). I then picked 4-6 out of 6 rooms.
+    This process is done by using an array storing array stores number from 0-5.
+    I shuffled it by using Fisher-Yate Shuffle(An shuffle algorithm with time complexity O(n)) and then loop
+    over it to pick rooms.size() of rooms in tempRooms. Then the picked rooms are assigned to rooms, a vector of room.
+    By looping through the rectangle area represented by each room, the algorithm marks every points in room ' '
+
+  3.1.2 void cooridorGenerator(vector<Room>& rooms)
+    I passed in the rooms we have in previous step. Then starting from 1st room, I linke it to its previous room.
+    I first mark startX and startY of the room, which is the center of the room, and mark endX and endY to the center
+    of the previous room.
+    In order to let start point go to the end point, I first need to check whether the startX is larger than endX
+    If so, startX-- untill it is equal to endX, during the process let the passing node become ' '. Then, if startY
+    smaller than endY, for instance, startY needs to ++ until it is equal to endY. During this process, also set
+    the passing node ' '.
+
 3.2 Teleportation of the player
-3.3 fight
+    void Dungeon::teleportPlayer()
+    This function will pick a Coord from emptyNodes. Then set the node '@' at this coord, and update player's
+    position.
+
+    Notice I could use swapNode which would make more sense. However, this function is also used for placing
+    the Player when reaching a new level.
+
+3.3 fightM
+    Mentioned above, the fight algorithm is applied to all actors. So in this part I would like to discuss the
+    mechanism of fighting. Fighting should happen before moving for monsters.
+
+    I made fightM(msg) and fight(msg) a boolean function instead of void. This is solely used for Snakewoman. Since
+    the Snakewoman needs to know if it hits the player to put the player into sleep. The fightM functions that
+    could be called by every monsters should return true if they hit, false otherwise. If hits, then the Snakewoman
+    has a 20% chance to put the player into sleep as long as the player is alive.
+
 3.4 Messages on the screen
+    In void Game::play(), I used a vector of strings to store the messages popping onto the screen. Then, for player's
+    functions action(messages) and monsterAttack(messages), I pass this vector by reference so they could update these
+    messages. Before the end of the round, I'll use a for-loop to print all the messages in the vector if it is not
+    empty

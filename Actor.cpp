@@ -55,17 +55,20 @@ bool Actor::ableMove(int x, int y) const{
     if(y < 0 || y > 17 || x < 0 || x > 69) return false;
     return dg->getNode(x,y) == ' ';
 }
-void Actor::fight(std::string& msg, Actor* def){
+bool Actor::fight(std::string& msg, Actor* def){
     if(def->hp > 0){
         int attackerPoints = dexterity+ wp->getDexterityBonus();
         int defenderPoints = def->get_dexterity() + def->get_armor();
         if(randInt(1,attackerPoints) >= randInt(1, defenderPoints)){
             def->set_hp(def->get_hp()-randInt(0,strength+ wp->getDamage()-1));
-            if(def->get_hp() <= 0){msg += " dealing a final blow."; return;}
+            if(def->get_hp() <= 0){msg += " dealing a final blow."; return true;}
             else 
                 msg +=" and hits.";
-        }
-        else
+            return true;
+        }else{
             msg +=" and misses.";
+            return false;
+        }
     }
+    return false; // for g32
 }

@@ -28,7 +28,7 @@ void Menu::displayMenu() const{
     }
 }
 void Menu::addItem(Item* i){
-    if(items.size() < 27)
+    if(items.size() < 27) // Can only have at most 26 items
         items.push_back(i);
 }
 void Menu::removeItem(int j) {

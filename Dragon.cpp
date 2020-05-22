@@ -12,14 +12,15 @@ Monster(p,dg,new Scroll(dg,x,y,randInt(0,4)),new Weapon(dg,x,y,LONG_SWORD),"Drag
     dg->setNode(x,y,'D');
 }
 
-bool Dragon::move(){
+bool Dragon::move(){ // Dragon only regenerates hp and doesn't move
     if(trueWithProbability(0.1))
         set_hp(get_hp()+1);
     return false;
 }
 
-void Dragon::fightM(string& msg){
+bool Dragon::fightM(string& msg){
+    if(get_sleep() > 0){set_sleep(get_sleep()-1); return false;}
     msg += "the Dragon " + get_weapon()->getActionName()+ " at the Player";
-    Monster::fightM(msg);
+    return Monster::fightM(msg);
 }
 

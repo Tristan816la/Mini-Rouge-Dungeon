@@ -34,7 +34,7 @@ void Scroll::effect(string& msg){
         p->set_max_hp(p->get_max_hp() + randInt(3,8));
         msg += "\nYou feel your heart beating stronger.";
     }else if (get_name() == "a scroll called scroll of enhance dexterity"){
-        p->set_dexterity(p->get_dexterity() + 2);
+        p->set_dexterity(p->get_dexterity() + 1);
         msg += "\nYou feel less of a klutz.";
     }
 }

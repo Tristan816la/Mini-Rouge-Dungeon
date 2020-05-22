@@ -9,7 +9,7 @@ class SnakeWoman : public Monster{
 public: 
     SnakeWoman(Player* p,  Dungeon* dg, int x, int y);
     virtual bool move();
-    virtual void fightM(std::string& msg);
+    virtual bool fightM(std::string& msg);
 private:
 
 };

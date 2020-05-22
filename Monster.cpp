@@ -24,9 +24,10 @@ bool Monster::checkMove(int x, int y) const{
     return false;
 }
 bool Monster::move() {exit(1);} // Monster is not an ABS, so just leave it here
-void Monster::fightM(string& msg){
-    if(get_hp() > 0) // the monster needs to be currently alive after player's attack
-        fight(msg,p);
+bool Monster::fightM(string& msg){ // the monster needs to be currently alive after player's attack
+    if(get_hp() > 0 && get_sleep() == 0) 
+        return fight(msg,p);
+    return false;
 }
 bool Monster::makeMove(){// Cannot make any move if slept
     if(get_sleep() > 0) {set_sleep(get_sleep()-1); return false;} 
@@ -45,7 +46,7 @@ bool Monster::makeMove(){// Cannot make any move if slept
     }
     return false;
 }
-bool Monster::diedandDrop(){
+bool Monster::diedandDrop(){ // return true if monster is died, set the drop
     if(get_hp() <= 0){
         get_dungeon()->setNode(get_x(),get_y(),' ');
         if(trueWithProbability(dropProb)){

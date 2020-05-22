@@ -8,7 +8,7 @@ class Actor{
         Actor(int hp, int ar, int str, int de, int sl,int x, int y, int mh, Dungeon* d, Weapon* w);
         virtual ~Actor();
         bool ableMove(int x, int y) const;
-        void fight(std::string& msg, Actor* def);
+        bool fight(std::string& msg, Actor* def);
 
         // Accessor
         int get_x() const;

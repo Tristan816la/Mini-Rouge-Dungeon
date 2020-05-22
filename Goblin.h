@@ -9,7 +9,8 @@ class Goblin : public Monster{
 public: 
     Goblin(Player* p,  Dungeon* dg, int x, int y);
     virtual bool move();
-    virtual void fightM(std::string& msg);
+    virtual bool fightM(std::string& msg);
+    bool goblinMove();
 private:
 };
 

@@ -2,7 +2,7 @@
 #define ITEM_H
 #include<iostream>
 class Dungeon;
-class Item{
+class Item{ // GameObjects in Spec
 public:
     Item(Dungeon* dg, int x, int y);
     Item(const Item&);

@@ -24,19 +24,22 @@ void Player::dfsGoblinLayout(int x, int y, int s){
     GoblinMap[y][x] = s;
     if (s == GoblinsmellDistance)
         return;
-    if (get_dungeon()->getNode(x,y+1) != '#'){
+    if (get_dungeon()->getNode(x,y) == 'G')
+        return; // Found Goblin, return. So, if a goblin blocks another goblin, the blocked goblin
+        // will not move
+    if (ableMove(x,y+1) || get_dungeon()->getNode(x,y+1) == 'G'){
         if(GoblinMap[y+1][x] == 9999 || GoblinMap[y+1][x] > s+1)
             dfsGoblinLayout(x,y+1,s+1);
     }
-    if (get_dungeon()->getNode(x,y-1) != '#'){
+    if (ableMove(x,y-1)|| get_dungeon()->getNode(x,y-1) == 'G'){
         if(GoblinMap[y-1][x] == 9999 || GoblinMap[y-1][x] > s+1)
             dfsGoblinLayout(x,y-1,s+1);
     }
-    if (get_dungeon()->getNode(x+1,y) != '#'){
+    if (ableMove(x+1,y)|| get_dungeon()->getNode(x+1,y) == 'G'){
         if(GoblinMap[y][x+1] == 9999 || GoblinMap[y][x+1] > s+1)
             dfsGoblinLayout(x+1,y,s+1);
     }
-    if (get_dungeon()->getNode(x-1,y) != '#'){
+    if (ableMove(x-1,y)|| get_dungeon()->getNode(x-1,y) == 'G'){
         if(GoblinMap[y][x-1] == 9999 || GoblinMap[y][x-1] > s+1)
             dfsGoblinLayout(x-1,y,s+1);
     }
@@ -81,13 +84,13 @@ bool Player::move(char act, string& msg) {
 }
 void Player::fightP(string& msg, Monster* m){
     msg = "Player " + get_weapon()->getActionName() + " at the " + m->getName(); 
-    fight(msg,m);
-    // When the player is wielding a magic fang
-    if(m->get_hp() > 0 && get_weapon()->get_name() == "magic fangs of sleep" && trueWithProbability(0.2)){
-        msg = msg.substr(0,msg.size()-1);
-        m->set_sleep(max(m->get_sleep(),randInt(2,6)));
-        string name;
-        msg += (", putting the " + m->getName() + " to sleep.");
+    if(fight(msg,m)){
+        // When the player is wielding a magic fang
+        if(m->get_hp() > 0 && get_weapon()->get_name() == "magic fangs of sleep" && trueWithProbability(0.2)){
+            msg = msg.substr(0,msg.size()-1);
+            m->set_sleep(max(m->get_sleep(),randInt(2,6)));
+            msg += (", putting the " + m->getName() + " to sleep.");
+        }
     }
 }
 void Player::cheat(){
@@ -129,7 +132,7 @@ void Player::utilize(char c, string& msg){
         else msg = "You can't wield " + menu->getItem(index)->get_name();
     }
 }
-bool Player::action(vector<string>& msg) {
+bool Player::action(vector<string>& msg){ // Identify the pressed key and make corresponding actions
     if(trueWithProbability(0.1) && get_hp() < get_max_hp()) {set_hp(get_hp()+1);}
     char act = getCharacter();
     if(get_sleep() > 0) {set_sleep(get_sleep()-1); return false;} // Cannot make any move if slept
@@ -137,7 +140,7 @@ bool Player::action(vector<string>& msg) {
     if (act == ARROW_DOWN || act == ARROW_LEFT || act == ARROW_RIGHT || act == ARROW_UP)
         move(act,message);
     else if (act == 'q')
-        return true;
+        return true; // only return true if the player wants quit
     else if (act == 'c')
         cheat();
     else if (act == 'g')
@@ -150,6 +153,7 @@ bool Player::action(vector<string>& msg) {
         if(get_dungeon()->getItem(get_x(),get_y()) == '>')
             get_dungeon()->start();
     }
+    get_dungeon()->reSetGoblinTable(); // Reset goblin table before layout
     dfsGoblinLayout(get_x(),get_y(), 0);
     if(!message.empty()) msg.push_back(message);
     return false;

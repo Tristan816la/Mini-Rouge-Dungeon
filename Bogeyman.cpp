@@ -17,8 +17,9 @@ bool Bogeyman::move(){
     }
     return false;
 }
-void Bogeyman::fightM(string& msg){
+bool Bogeyman::fightM(string& msg){
+    if(get_sleep() > 0){set_sleep(get_sleep()-1); return false;}
     msg += "the Bogeyman " + get_weapon()->getActionName() + " at the Player";
-    Monster::fightM(msg);
+    return Monster::fightM(msg);
 }
 

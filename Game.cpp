@@ -11,12 +11,13 @@ using namespace std;
 
 Game::Game(int goblinSmellDistance){
     clearScreen();
-    dg = new Dungeon(-1);
+    dg = new Dungeon(-1); // Start from -1 since start() has level++ in it
     dg->start();
     dg->getPlayer()->setGoblinsmellDistance(goblinSmellDistance);
 }
+
 Game::~Game(){delete dg;}
-void Game::handleEnd()const{
+void Game::handleEnd()const{ // not quiting the game unless the player presses 'q'
     cout << "Press q to exit game." << endl;
     char end;
     do{
@@ -29,11 +30,11 @@ void Game::play()
     
     while(dg->getPlayer()->get_hp() > 0 && !dg->getPlayer()->win()){
         vector<string> messages;
-        bool quit = dg->getPlayer()->action(messages);
+        bool quit = dg->getPlayer()->action(messages); // action return true when user hit 'q'
         dg->updateMonster();
         dg->MonstersAttack(messages); // First attack then move
         dg->moveAllMonsters();
-        if(quit) return; 
+        if(quit) return; // use a quit design could call destructors normally
         clearScreen();
 
     //After everything, Dungeon should display

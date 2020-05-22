@@ -18,13 +18,17 @@ bool SnakeWoman::move(){
     }
     return false;
 }
-void SnakeWoman::fightM(string& msg){
+bool SnakeWoman::fightM(string& msg){
+    if(get_sleep() > 0){set_sleep(get_sleep()-1); return false;}
     msg += "the Snakewoman " + get_weapon()->getActionName() + " at the Player";
-    Monster::fightM(msg);
-    if(getPlayer()->get_hp() > 0 && trueWithProbability(0.2)){
-        getPlayer()->set_sleep(max(getPlayer()->get_sleep(),randInt(2,6)));
-        msg = msg.substr(0,msg.size()-1); // delete '.' at the end
-        msg += ", putting Player to sleep.";
+    if(Monster::fightM(msg)){
+        if(getPlayer()->get_hp() > 0 && trueWithProbability(0.2)){
+            getPlayer()->set_sleep(max(getPlayer()->get_sleep(),randInt(2,6)));
+            msg = msg.substr(0,msg.size()-1); // delete '.' at the end
+            msg += ", putting Player to sleep.";
+        }
+        return true;
     }
+    return false;
 }
 
