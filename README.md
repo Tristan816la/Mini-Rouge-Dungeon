@@ -35,7 +35,7 @@ From this game, I learned how to maintain a good object-oriented design. Some pa
 'D': Dragon\
 'B': Bogeyman\
 '?': Scroll\
-')': Weapon\
+')': Weapon
 
 # How to play
 1. **Move**: 'hjkl' or arrow keys 
