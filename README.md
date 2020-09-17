@@ -13,17 +13,18 @@ This is a rouge-like game I designed using C++ with an object-oriented design. I
 
 # Difficulties and Achievements
 There are two main difficulties I encoutered in this game.
-1. Room generation:
+1.  **Room generation:**\
 Since the rooms have to be a square shape generated in a specific area, I have to specify psedurandom areas for generating theses
 squares. Each room also needs to have a route(routes) connecting to each other, so I chose random points on the rooms' edges to 
 form the room allays.
 
-2. Goblin Algorithm:
+2. **Goblin Algorithm:**\
 (P.s. At the time I designed this game, I haven't learnt bfs.)
 Since goblin in this game is a smart creature (it always finds the shortest paths to the player), I used an optimized dfs for their path findings. Dfs is not the best approach, especially the map has multiple goblins. But, if I took a note of the visited
 grid, marking it with distance number (instead of visited status), avoiding the possible cycles and not necessary repetitive steps. As a result, this game could run smoothly even with dfs.  
 
-Achievement:
+\
+**Achievement:**\
 From this game, I learned how to maintain a good object-oriented design. Some pathfinding algorithms also blown my mind, and by comparing the efficiency of using different algorithms, I saw the glamour of picking up the best algorithms to solve the problem.
 
 # Game Symbols:
