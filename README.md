@@ -1,13 +1,12 @@
 # Mini Rouge Dungeon
 # Demos of this game
-Click on the link to download and see the demo of this game.
-[Link](game)
+Click on the link to download and see the demo of this <a href="game" download>game</a>.\
 You can also compile the game by cloning this repo and run:
 
-'''sh
+```{sh}
 g++ -o game *.cpp
 ./game
-'''
+```
 
 # Introduction
 This is a rouge-like game I designed using C++ with an object-oriented design. In this game, the player has to fight through four levels, beat the monsters, and pick up the trophy at level 4 to win the game.
@@ -28,15 +27,15 @@ Achievement:
 From this game, I learned how to maintain a good object-oriented design. Some pathfinding algorithms also blown my mind, and by comparing the efficiency of using different algorithms, I saw the glamour of picking up the best algorithms to solve the problem.
 
 # Game Symbols:
-'#': Wall
-' ': Empty space
-'@': Player
-'S': Snakewoman
-'G': Goblin
-'D': Dragon
-'B': Bogeyman
-'?': Scroll
-')': Weapon
+'#': Wall\
+' ': Empty space\
+'@': Player\
+'S': Snakewoman\
+'G': Goblin\
+'D': Dragon\
+'B': Bogeyman\
+'?': Scroll\
+')': Weapon\
 
 # How to play
 1. **Move**: 'hjkl' or arrow keys 
@@ -46,21 +45,28 @@ From this game, I learned how to maintain a good object-oriented design. Some pa
 5. **Cheat**: Press 'c' to enter the cheat mode
 6. **Wield**: Press 'w' to go to the inventory, and press the corresponding weapon number to wield weapons
 7. **Read**: Press 'r' to go to the inventory, and press the corresponding scroll number to read scroll
-8. **Next Floor**: Stand on the '>' and press 'shift' and '>' to go to the next floor 
+8. **Next Floor**: Stand on the '>' and press 'shift' and '>' to go to the next floor
 
 The following are the design docs, and you could see how I implement this program by reading through it. It took like 10 minutes to
-read.
-[Link](report.txt)
+read. [Link](report.txt)
 
-Contents:
-  2.1 Dungeon
-  2.2 Actor
-    2.2.1 Monsters
-    2.2.1.n Each Monster (int n; n <= 4 && n>=1)
-  2.2.2 Player
-  2.3 Items
-    2.3.1 Weapons
-    2.3.2 Scrolls
-  2.4 Menu
-  2.5 Game
+**Contents:**
+<ol>
+  <li>Dungeon</li>
+  <li>Actor
+    <ol>
+        <li>Monsters</li>
+        <li>Each Monster (int n; n <= 4 && n>=1)</li>
+    </ol>
+  </li>
+  <li>Player</li>
+  <li>Items
+    <ol>
+        <li>Weapons</li>
+        <li>Scrolls</li>
+    </ol>
+  </li>
+  <li>Menu</li>
+  <li>Game</li>
+</ol>
 
